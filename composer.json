@@ -3,12 +3,12 @@
     "description": "This bundle provides a way to validate JSON in request/response against a schema",
     "type": "symfony-bundle",
     "require": {
-        "php": ">=7.1",
+        "php": "^7.4",
         "ext-json": "*",
-        "symfony/config": ">=3.0",
-        "symfony/http-foundation": ">=3.2",
+        "symfony/config": "^5.4",
+        "symfony/http-foundation": "^5.4",
         "justinrainbow/json-schema": ">=5.2",
-        "sensio/framework-extra-bundle": ">=3.0",
+        "sensio/framework-extra-bundle": "^6.0",
         "psr/log": "^1.1"
     },
     "require-dev": {
@@ -18,7 +18,13 @@
     "authors": [
         {
             "name": "Anton Sukhachev",
-            "email": "mrsuh6@gmail.com"
+            "email": "mrsuh6@gmail.com",
+            "role": "Author of mrsuh/json-validation-bundle"
+        },
+        {
+            "name": "John Noel",
+            "email": "john.noel@joipolloi.com",
+            "role": "Author of joipolloi/json-validation-bundle"
         }
     ],
     "autoload": {
