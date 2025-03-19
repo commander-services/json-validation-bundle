@@ -1,6 +1,6 @@
 <?php
 
-namespace Mrsuh\JsonValidationBundle\JsonValidator;
+namespace Commander\JsonValidationBundle\JsonValidator;
 
 use JsonSchema\Exception\JsonDecodingException;
 use JsonSchema\Validator;

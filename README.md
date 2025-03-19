@@ -1,6 +1,6 @@
 # JSON Validation Bundle
 
-![Test Status](https://github.com/mrsuh/json-validation-bundle/workflows/Tests/badge.svg)
+![Test Status](https://github.com/commander/json-validation-bundle/workflows/Tests/badge.svg)
 
 A Symfony bundle that provides an annotation to validate request/response JSON against a schema.
 
@@ -13,7 +13,7 @@ A Symfony bundle that provides an annotation to validate request/response JSON a
 ## Installation
 
 ```bash
-composer require mrsuh/json-validation-bundle
+composer require commander/json-validation-bundle
 ```
 
 ## Usage
@@ -60,8 +60,8 @@ Controller/MyController.php
 ```php
 <?php
 
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonRequest;
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonResponse;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonRequest;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class MyController
@@ -114,7 +114,7 @@ app.WARNING: Json response validation {"uri":"http://127.0.0.1:8000/my","schemaP
 ## Configuration
 
 ```yaml
-mrsuh_json_validation:
+commander_json_validation:
     enable_request_listener: true #default value
     enable_response_listener: true #default value
     enable_exception_listener: true #default value
@@ -124,7 +124,7 @@ mrsuh_json_validation:
 ```php
 <?php
 
-use Mrsuh\JsonValidationBundle\JsonValidator\JsonValidator;
+use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 

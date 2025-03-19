@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonResponse;
-use Mrsuh\JsonValidationBundle\EventListener\ValidateJsonResponseListener;
-use Mrsuh\JsonValidationBundle\JsonValidator\JsonValidator;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonResponse;
+use Commander\JsonValidationBundle\EventListener\ValidateJsonResponseListener;
+use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 use Symfony\Component\Config\FileLocator;

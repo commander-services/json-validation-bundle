@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonResponse;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonResponse;
 use PHPUnit\Framework\TestCase;
 
 class ValidateJsonResponseTest extends TestCase

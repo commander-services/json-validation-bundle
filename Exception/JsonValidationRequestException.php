@@ -1,6 +1,6 @@
 <?php
 
-namespace Mrsuh\JsonValidationBundle\Exception;
+namespace Commander\JsonValidationBundle\Exception;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

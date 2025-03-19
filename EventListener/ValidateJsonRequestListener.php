@@ -1,10 +1,10 @@
 <?php
 
-namespace Mrsuh\JsonValidationBundle\EventListener;
+namespace Commander\JsonValidationBundle\EventListener;
 
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonRequest;
-use Mrsuh\JsonValidationBundle\Exception\JsonValidationRequestException;
-use Mrsuh\JsonValidationBundle\JsonValidator\JsonValidator;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonRequest;
+use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
+use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
 class ValidateJsonRequestListener

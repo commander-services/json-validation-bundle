@@ -1,6 +1,6 @@
 <?php
 
-namespace Mrsuh\JsonValidationBundle\Annotation;
+namespace Commander\JsonValidationBundle\Annotation;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ConfigurationAnnotation;
 use Symfony\Component\HttpFoundation\Response;

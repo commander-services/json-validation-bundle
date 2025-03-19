@@ -1,9 +1,9 @@
 <?php
 
-namespace Mrsuh\JsonValidationBundle\EventListener;
+namespace Commander\JsonValidationBundle\EventListener;
 
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonResponse;
-use Mrsuh\JsonValidationBundle\JsonValidator\JsonValidator;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonResponse;
+use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 

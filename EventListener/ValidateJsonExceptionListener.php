@@ -1,8 +1,8 @@
 <?php
 
-namespace Mrsuh\JsonValidationBundle\EventListener;
+namespace Commander\JsonValidationBundle\EventListener;
 
-use Mrsuh\JsonValidationBundle\Exception\JsonValidationRequestException;
+use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

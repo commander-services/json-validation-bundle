@@ -2,10 +2,10 @@
 
 namespace Tests;
 
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonRequest;
-use Mrsuh\JsonValidationBundle\EventListener\ValidateJsonRequestListener;
-use Mrsuh\JsonValidationBundle\Exception\JsonValidationRequestException;
-use Mrsuh\JsonValidationBundle\JsonValidator\JsonValidator;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonRequest;
+use Commander\JsonValidationBundle\EventListener\ValidateJsonRequestListener;
+use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
+use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;

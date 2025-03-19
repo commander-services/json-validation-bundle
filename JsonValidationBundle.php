@@ -1,9 +1,9 @@
 <?php
 
-namespace Mrsuh\JsonValidationBundle;
+namespace Commander\JsonValidationBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Mrsuh\JsonValidationBundle\DependencyInjection\JsonValidationExtension;
+use Commander\JsonValidationBundle\DependencyInjection\JsonValidationExtension;
 
 class JsonValidationBundle extends Bundle
 {

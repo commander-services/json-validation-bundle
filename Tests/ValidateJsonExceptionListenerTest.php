@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use Mrsuh\JsonValidationBundle\Annotation\ValidateJsonRequest;
-use Mrsuh\JsonValidationBundle\EventListener\ValidateJsonExceptionListener;
-use Mrsuh\JsonValidationBundle\Exception\JsonValidationRequestException;
+use Commander\JsonValidationBundle\Annotation\ValidateJsonRequest;
+use Commander\JsonValidationBundle\EventListener\ValidateJsonExceptionListener;
+use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 use Symfony\Component\HttpFoundation\{Request, Response};
