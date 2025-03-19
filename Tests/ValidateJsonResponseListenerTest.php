@@ -6,13 +6,13 @@ use Commander\JsonValidationBundle\Annotation\ValidateJsonResponse;
 use Commander\JsonValidationBundle\EventListener\ValidateJsonResponseListener;
 use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LogLevel;
+use Psr\Log\LoggerInterface;
+use Psr\Log\Test\TestLogger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Log\Logger;
 
 class ValidateJsonResponseListenerTest extends TestCase
 {
@@ -27,12 +27,10 @@ class ValidateJsonResponseListenerTest extends TestCase
 
         $event = $this->getResponseEvent($request, $response);
 
-        $resource = fopen('php://memory', 'r+');
-        $listener = $this->getValidateJsonResponseListener($resource);
+        $logger = new TestLogger();
+        $listener = $this->createValidateJsonResponseListener($event, $logger);
 
-        $listener->onKernelResponse($event);
-
-        $this->assertFalse($this->hasResourceStr($resource, 'Json response validation'));
+        $this->assertFalse($logger->hasWarning('Json response validation'));
     }
 
     public function testInvalidJson()
@@ -46,12 +44,10 @@ class ValidateJsonResponseListenerTest extends TestCase
 
         $event = $this->getResponseEvent($request, $response);
 
-        $resource = fopen('php://memory', 'r+');
-        $listener = $this->getValidateJsonResponseListener($resource);
+        $logger = new TestLogger();
+        $listener = $this->createValidateJsonResponseListener($event, $logger);
 
-        $listener->onKernelResponse($event);
-
-        $this->assertTrue($this->hasResourceStr($resource, 'Json response validation'));
+        $this->assertTrue($logger->hasWarning('Json response validation'));
     }
 
     public function testValidJson()
@@ -65,21 +61,22 @@ class ValidateJsonResponseListenerTest extends TestCase
 
         $event = $this->getResponseEvent($request, $response);
 
-        $resource = fopen('php://memory', 'r+');
-        $listener = $this->getValidateJsonResponseListener($resource);
+        $logger = new TestLogger();
+        $listener = $this->createValidateJsonResponseListener($event, $logger);
 
-        $listener->onKernelResponse($event);
-
-        $this->assertFalse($this->hasResourceStr($resource, 'Json response validation'));
+        $this->assertFalse($logger->hasWarning('Json response validation'));
     }
 
-    protected function getValidateJsonResponseListener($resource): ValidateJsonResponseListener
+    protected function createValidateJsonResponseListener(ResponseEvent $event, ?LoggerInterface $logger = null): ValidateJsonResponseListener
     {
-        $locator   = new FileLocator([__DIR__]);
+        $locator = new FileLocator([__DIR__]);
         $validator = new JsonValidator($locator, __DIR__);
-        $logger    = new Logger(LogLevel::DEBUG, $resource);
+        $logger ??= new TestLogger();
 
-        return new ValidateJsonResponseListener($validator, $logger);
+        $listener = new ValidateJsonResponseListener($validator, $logger);
+        $listener->onKernelResponse($event);
+
+        return $listener;
     }
 
     protected function getResponseEvent(Request $request, Response $response): ResponseEvent
@@ -88,20 +85,5 @@ class ValidateJsonResponseListenerTest extends TestCase
         $type   = HttpKernelInterface::MASTER_REQUEST;
 
         return new ResponseEvent($kernel, $request, $type, $response);
-    }
-
-    /**
-     * @param resource $loggerResource
-     */
-    public function hasResourceStr($loggerResource, string $needle)
-    {
-        fseek($loggerResource, 0);
-        while ($buff = fgets($loggerResource)) {
-            if (mb_strpos($buff, $needle) !== false) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
