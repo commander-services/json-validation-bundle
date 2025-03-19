@@ -1,0 +1,11 @@
+services:
+  php:
+    build:
+      context: .
+    tty: true
+    volumes:
+      - ./:/app
+      - php-composer-data:/root/.composer
+
+volumes:
+  php-composer-data:
