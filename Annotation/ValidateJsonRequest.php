@@ -13,24 +13,18 @@ class ValidateJsonRequest extends ConfigurationAnnotation
 
     /**
      * The path to the JSON schema
-     *
-     * @var string
      */
-    private $path = '';
+    private string $path = '';
 
     /**
      * Whether an empty JSON request value is valid
-     *
-     * @var bool
      */
-    private $emptyIsValid = false;
+    private bool $emptyIsValid = false;
 
     /**
      * Only validate on certain HTTP method(s)
-     *
-     * @var array
      */
-    private $methods = [];
+    private array $methods = [];
 
     /**
      * @param array $data An array of key/value parameters

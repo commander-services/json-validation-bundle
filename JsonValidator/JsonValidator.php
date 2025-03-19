@@ -8,13 +8,11 @@ use Symfony\Component\Config\FileLocatorInterface;
 
 class JsonValidator
 {
-    /** @var FileLocatorInterface */
-    protected $locator;
+    protected FileLocatorInterface $locator;
 
-    protected $schemaDir = '';
+    protected string $schemaDir;
 
-    /** @var array */
-    protected $errors = [];
+    protected array $errors = [];
 
     public function __construct(FileLocatorInterface $locator, string $schemaDir)
     {

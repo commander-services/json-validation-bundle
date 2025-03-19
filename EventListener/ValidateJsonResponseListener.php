@@ -9,11 +9,9 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class ValidateJsonResponseListener
 {
-    /** @var JsonValidator */
-    protected $jsonValidator;
+    protected JsonValidator $jsonValidator;
 
-    /** @var LoggerInterface */
-    protected $logger;
+    protected LoggerInterface $logger;
 
     public function __construct(JsonValidator $jsonValidator, LoggerInterface $logger)
     {

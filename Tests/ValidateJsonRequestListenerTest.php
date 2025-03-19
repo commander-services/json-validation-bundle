@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ValidateJsonRequestListenerTest extends TestCase
 {
-    public function testMissingAttribute()
+    public function testMissingAttribute(): void
     {
         $request  = new Request();
         $event    = $this->getControllerEvent($request);
@@ -25,7 +25,7 @@ class ValidateJsonRequestListenerTest extends TestCase
         $this->assertFalse($request->attributes->has('validJson'));
     }
 
-    public function testInvalidMethod()
+    public function testInvalidMethod(): void
     {
         $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json', 'methods' => ['POST']]);
 
@@ -41,11 +41,11 @@ class ValidateJsonRequestListenerTest extends TestCase
         $this->assertFalse($request->attributes->has('validJson'));
     }
 
-    public function testInvalidJson()
+    public function testInvalidJson(): void
     {
         $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json']);
 
-        $request = Request::create('/', 'POST', [], [], [], [], '{invalid');
+        $request = Request::create('/', Request::METHOD_POST, [], [], [], [], '{invalid');
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
         $event    = $this->getControllerEvent($request);
@@ -55,11 +55,11 @@ class ValidateJsonRequestListenerTest extends TestCase
         $listener->onKernelController($event);
     }
 
-    public function testValidJson()
+    public function testValidJson(): void
     {
         $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json']);
 
-        $request = Request::create('/', 'POST', [], [], [], [], '{"test": "hello"}');
+        $request = Request::create('/', Request::METHOD_POST, [], [], [], [], '{"test": "hello"}');
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
         $event    = $this->getControllerEvent($request);
@@ -71,15 +71,15 @@ class ValidateJsonRequestListenerTest extends TestCase
         $this->assertEquals($request->attributes->get('validJson')->test, 'hello');
     }
 
-    public function testValidJsonArray()
+    public function testValidJsonArray(): void
     {
         $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json']);
-        $request    = Request::create('/', 'POST', [], [], [], [], '{"test": "hello"}');
+        $request    = Request::create('/', Request::METHOD_POST, [], [], [], [], '{"test": "hello"}');
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
         $kernel     = $this->getMockBuilder(HttpKernelInterface::class)
                            ->getMock();
-        $controller = function (array $validJson) {
+        $controller = function (array $validJson): void {
         };
         $type       = HttpKernelInterface::MASTER_REQUEST;
         $event      = new ControllerEvent($kernel, $controller, $request, $type);
@@ -105,7 +105,7 @@ class ValidateJsonRequestListenerTest extends TestCase
     {
         $kernel     = $this->getMockBuilder(HttpKernelInterface::class)
                            ->getMock();
-        $controller = function ($validJson) {
+        $controller = function ($validJson): void {
         };
         $type       = HttpKernelInterface::MASTER_REQUEST;
 

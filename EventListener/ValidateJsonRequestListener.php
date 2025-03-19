@@ -9,8 +9,7 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
 class ValidateJsonRequestListener
 {
-    /** @var JsonValidator */
-    protected $jsonValidator;
+    protected JsonValidator $jsonValidator;
 
     public function __construct(JsonValidator $jsonValidator)
     {
@@ -33,9 +32,7 @@ class ValidateJsonRequestListener
         /** @var ValidateJsonRequest $annotation */
         $annotation = $request->attributes->get($annotationAlias);
 
-        $httpMethods = array_map(function (string $method): string {
-            return strtoupper($method);
-        }, $annotation->getMethods());
+        $httpMethods = array_map(fn(string $method): string => strtoupper($method), $annotation->getMethods());
 
         if (!empty($httpMethods) && !in_array($request->getMethod(), $httpMethods)) {
             return;
@@ -68,8 +65,7 @@ class ValidateJsonRequestListener
      *
      * This is based upon the type hint for the $validJson argument
      *
-     * @return bool
-     * @see Sensio\Bundle\FrameworkExtraBundle\EventListener\ParamConverterListener::onKernelController
+     * @see \Sensio\Bundle\FrameworkExtraBundle\EventListener\ParamConverterListener::onKernelController
      */
     protected function getAsArray($controller): bool
     {

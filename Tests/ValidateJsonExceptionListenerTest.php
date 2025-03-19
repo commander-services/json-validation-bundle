@@ -7,13 +7,14 @@ use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\Test\TestLogger;
-use Symfony\Component\HttpFoundation\{Request, Response};
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ValidateJsonExceptionListenerTest extends TestCase
 {
-    public function testNonJsonValidationException()
+    public function testNonJsonValidationException(): void
     {
         $event = $this->getEvent(new \RuntimeException('Not JsonValidationException'));
 
@@ -24,7 +25,7 @@ class ValidateJsonExceptionListenerTest extends TestCase
         $this->assertFalse($logger->hasError('Json request validation'));
     }
 
-    public function testEmptyErrors()
+    public function testEmptyErrors(): void
     {
         $event = $this->getEvent($this->createJsonValidationRequestException([]));
 
@@ -42,7 +43,7 @@ class ValidateJsonExceptionListenerTest extends TestCase
         $this->assertTrue($logger->hasError('Json request validation'));
     }
 
-    public function testMessageOnlyError()
+    public function testMessageOnlyError(): void
     {
         $event = $this->getEvent($this->createJsonValidationRequestException([['message' => 'Test message'],]));
 
@@ -55,7 +56,7 @@ class ValidateJsonExceptionListenerTest extends TestCase
         $this->assertTrue($logger->hasError('Json request validation'));
     }
 
-    public function testConstraintError()
+    public function testConstraintError(): void
     {
         $event = $this->getEvent($this->createJsonValidationRequestException([
             [
@@ -80,7 +81,7 @@ class ValidateJsonExceptionListenerTest extends TestCase
         ], $json['errors']);
     }
 
-    public function testMixedErrors()
+    public function testMixedErrors(): void
     {
         $event = $this->getEvent($this->createJsonValidationRequestException([
             ['message' => 'Test message'],

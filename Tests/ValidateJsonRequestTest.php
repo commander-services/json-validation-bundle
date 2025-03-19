@@ -10,7 +10,7 @@ class ValidateJsonRequestTest extends TestCase
     /**
      * @dataProvider constructorOptionsProvider
      */
-    public function testConstructorOptions(array $options, string $expectedPath, bool $expectedEmptyIsValid, array $expectedMethods)
+    public function testConstructorOptions(array $options, string $expectedPath, bool $expectedEmptyIsValid, array $expectedMethods): void
     {
         $annotation = new ValidateJsonRequest($options);
 
@@ -19,7 +19,7 @@ class ValidateJsonRequestTest extends TestCase
         $this->assertEquals($annotation->getMethods(), $expectedMethods);
     }
 
-    public function testInvalidConstructorOptions()
+    public function testInvalidConstructorOptions(): void
     {
         $this->expectException(\RuntimeException::class);
         new ValidateJsonRequest(['invalid_option' => 'yes']);

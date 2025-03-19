@@ -14,24 +14,18 @@ class ValidateJsonResponse extends ConfigurationAnnotation
 
     /**
      * The path to the JSON schema
-     *
-     * @var string
      */
-    private $path = '';
+    private string $path = '';
 
     /**
      * Whether an empty JSON request value is valid
-     *
-     * @var bool
      */
-    private $emptyIsValid = false;
+    private bool $emptyIsValid = false;
 
     /**
      * Only validate on certain HTTP statuses
-     *
-     * @var array
      */
-    public $statuses = [];
+    public array $statuses = [];
 
     /**
      * @param array $data An array of key/value parameters

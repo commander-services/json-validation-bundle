@@ -16,12 +16,12 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ValidateJsonResponseListenerTest extends TestCase
 {
-    public function testInvalidStatus()
+    public function testInvalidStatus(): void
     {
-        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [200]]);
+        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
 
         $request  = Request::create('/');
-        $response = new Response('', 201);
+        $response = new Response('', Response::HTTP_CREATED);
 
         $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
 
@@ -33,12 +33,12 @@ class ValidateJsonResponseListenerTest extends TestCase
         $this->assertFalse($logger->hasWarning('Json response validation'));
     }
 
-    public function testInvalidJson()
+    public function testInvalidJson(): void
     {
-        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [200]]);
+        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
 
         $request  = Request::create('/');
-        $response = new Response('{invalid', 200);
+        $response = new Response('{invalid', Response::HTTP_OK);
 
         $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
 
@@ -50,12 +50,12 @@ class ValidateJsonResponseListenerTest extends TestCase
         $this->assertTrue($logger->hasWarning('Json response validation'));
     }
 
-    public function testValidJson()
+    public function testValidJson(): void
     {
-        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [200]]);
+        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
 
         $request  = Request::create('/');
-        $response = new Response('{"test": "hello"}', 200);
+        $response = new Response('{"test": "hello"}', Response::HTTP_OK);
 
         $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
 
