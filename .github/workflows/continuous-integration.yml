@@ -1,0 +1,87 @@
+# from friendsofsymfony/rest-bundle:
+# https://github.com/FriendsOfSymfony/FOSRestBundle/blob/d24736896518bae817bf0de8a6b682cb6535044b/.github/workflows/continuous-integration.yml
+
+name: "CI"
+
+on:
+    pull_request:
+        branches:
+            - "*.x"
+    push:
+        branches:
+            - "*.x"
+
+jobs:
+    phpunit:
+        name: "PHPUnit"
+        runs-on: "ubuntu-22.04"
+        continue-on-error: ${{ matrix.can-fail }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - php-version: "7.4"
+                      composer-flags: "--prefer-lowest"
+                      symfony-require: "5.4.*"
+                      can-fail: false
+                    - php-version: "7.4"
+                      composer-flags: ""
+                      can-fail: false
+
+        env:
+            COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        steps:
+            - name: "Checkout"
+              uses: "actions/checkout@v4"
+
+            - name: "Install PHP with XDebug"
+              uses: "shivammathur/setup-php@v2"
+              if: "${{ matrix.coverage != '' }}"
+              with:
+                  php-version: "${{ matrix.php-version }}"
+                  coverage: "xdebug"
+                  tools: "composer:v2,flex"
+
+            - name: "Install PHP without coverage"
+              uses: "shivammathur/setup-php@v2"
+              if: "${{ matrix.coverage == '' }}"
+              with:
+                  php-version: "${{ matrix.php-version }}"
+                  coverage: "none"
+                  tools: "composer:v2,flex"
+
+            - name: "Validate composer.json"
+              run: "composer validate"
+
+            - name: "Cache dependencies installed with composer"
+              uses: "actions/cache@v4"
+              with:
+                  path: "~/.composer/cache"
+                  key: "php-${{ matrix.php-version }}-composer-locked-${{ hashFiles('composer.lock') }}"
+                  restore-keys: "php-${{ matrix.php-version }}-composer-locked-"
+
+            - name: "Remove SensioFrameworkExtraBundle if required"
+              if: "${{ matrix.remove-sensio-bundle == 'yes' }}"
+              env:
+                  SYMFONY_REQUIRE: "${{ matrix.symfony-require }}"
+              run: |
+                  composer remove --no-update --dev sensio/framework-extra-bundle
+
+            - name: "Install dependencies with composer"
+              env:
+                  SYMFONY_REQUIRE: "${{ matrix.symfony-require }}"
+              run: |
+                  composer update --no-interaction --no-progress ${{ matrix.composer-flags }}
+
+            - name: "Run PHPUnit with coverage"
+              if: "${{ matrix.coverage != '' }}"
+              run: |
+                  XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-clover=coverage.clover
+                  wget https://scrutinizer-ci.com/ocular.phar
+                  php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+
+            - name: "Run PHPUnit"
+              if: "${{ matrix.coverage == '' }}"
+              run: "php vendor/bin/phpunit"
