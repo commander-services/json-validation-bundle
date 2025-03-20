@@ -42,11 +42,27 @@ class ValidateJsonRequestListenerTest extends TestCase
         $this->assertFalse($request->attributes->has('validJson'));
     }
 
+    public function testInvalidSchemaPath(): void
+    {
+        $annotation = new ValidateJsonRequest(['path' => 'file/not/exists.json']);
+
+        $request = Request::create('/');
+        $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
+
+        $event = $this->createControllerEvent($request);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $listener = $this->createValidateJsonListener($event);
+
+        $this->assertFalse($request->attributes->has('validJson'));
+    }
+
     public function testInvalidSchema(): void
     {
         $annotation = new ValidateJsonRequest(['path' => 'Tests/schema-invalid.json']);
 
-        $request = Request::create('/', Request::METHOD_POST, [], [], [], [], '{"test": "hello"}');
+        $request = Request::create('/');
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
         $event = $this->createControllerEvent($request);
@@ -145,8 +161,9 @@ class ValidateJsonRequestListenerTest extends TestCase
 
     protected function createValidateJsonListener(ControllerEvent $event): ValidateJsonRequestListener
     {
-        $locator = new FileLocator([__DIR__]);
-        $validator = new JsonValidator($locator, dirname(__DIR__));
+        $projectDir = dirname(__DIR__);
+        $locator = new FileLocator([$projectDir]);
+        $validator = new JsonValidator($locator, $projectDir);
 
         $listener = new ValidateJsonRequestListener($validator);
         $listener->onKernelController($event);

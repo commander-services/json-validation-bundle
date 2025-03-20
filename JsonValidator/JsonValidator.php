@@ -32,7 +32,7 @@ class JsonValidator
         } catch (\InvalidArgumentException $e) {
             $this->errors[] = sprintf('Unable to locate schema %s', $schemaPath);
 
-            return null;
+            throw $e;
         }
 
         try {

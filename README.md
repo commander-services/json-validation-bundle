@@ -8,6 +8,7 @@ A Symfony bundle that provides an annotation to validate request/response JSON a
 ### Differences from mrsuh/json-validation-bundle
 * [opis/json-schema](https://github.com/opis/json-schema) validator supporting draft-06, draft-07, draft-2019-09, draft-2020-12
 * supporting Symfony `5.4`
+* schema path starts from project directory
 
 ### Differences from joipolloi/json-validation-bundle
 * added `response` validation
