@@ -82,7 +82,7 @@ class ValidateJsonResponseListenerTest extends TestCase
     protected function getResponseEvent(Request $request, Response $response): ResponseEvent
     {
         $kernel = $this->getMockBuilder(HttpKernelInterface::class)->getMock();
-        $type   = HttpKernelInterface::MASTER_REQUEST;
+        $type   = HttpKernelInterface::MAIN_REQUEST;
 
         return new ResponseEvent($kernel, $request, $type, $response);
     }

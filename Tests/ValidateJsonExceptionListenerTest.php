@@ -113,7 +113,7 @@ class ValidateJsonExceptionListenerTest extends TestCase
         $kernel      = $this->getMockBuilder(HttpKernelInterface::class)
                             ->getMock();
         $request     = Request::create('/');
-        $requestType = HttpKernelInterface::MASTER_REQUEST;
+        $requestType = HttpKernelInterface::MAIN_REQUEST;
 
         return new ExceptionEvent($kernel, $request, $requestType, $exception);
     }

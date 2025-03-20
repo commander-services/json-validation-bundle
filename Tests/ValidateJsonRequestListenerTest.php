@@ -81,7 +81,7 @@ class ValidateJsonRequestListenerTest extends TestCase
                            ->getMock();
         $controller = function (array $validJson): void {
         };
-        $type       = HttpKernelInterface::MASTER_REQUEST;
+        $type       = HttpKernelInterface::MAIN_REQUEST;
         $event      = new ControllerEvent($kernel, $controller, $request, $type);
 
         $listener = $this->getValidateJsonListener();
@@ -107,7 +107,7 @@ class ValidateJsonRequestListenerTest extends TestCase
                            ->getMock();
         $controller = function ($validJson): void {
         };
-        $type       = HttpKernelInterface::MASTER_REQUEST;
+        $type       = HttpKernelInterface::MAIN_REQUEST;
 
         return new ControllerEvent($kernel, $controller, $request, $type);
     }
