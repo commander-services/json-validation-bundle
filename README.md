@@ -2,7 +2,12 @@
 
 ![Test Status](https://github.com/commander/json-validation-bundle/workflows/Tests/badge.svg)
 
-A Symfony bundle that provides an annotation to validate request/response JSON against a schema.
+A Symfony bundle that provides an annotation to validate request/response JSON against a schema 
+ using [opis/json-schema](https://github.com/opis/json-schema) validator.
+
+### Differences from mrsuh/json-validation-bundle
+* [opis/json-schema](https://github.com/opis/json-schema) validator supporting draft-06, draft-07, draft-2019-09, draft-2020-12
+* supporting Symfony `5.4`
 
 ### Differences from joipolloi/json-validation-bundle
 * added `response` validation
@@ -67,8 +72,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class MyController
 {
     /**
-     * @ValidateJsonRequest("JsonSchema/Request/myAction.json", methods={"POST"}, emptyIsValid=true)
-     * @ValidateJsonResponse("JsonSchema/Response/myAction.json", statuses={"200"}, emptyIsValid=true)
+     * @ValidateJsonRequest("path/to/JsonSchema/Request/myAction.json", methods={"POST"}, emptyIsValid=true)
+     * @ValidateJsonResponse("path/to/JsonSchema/Response/myAction.json", statuses={"200"}, emptyIsValid=true)
      */
     public function myAction(array $validJson): JsonResponse
     {
@@ -132,7 +137,7 @@ class MyController
 {
     public function myAction(Request $request, JsonValidator $validator): Response
     {
-        $validator->validate($request->getContent(), 'JsonSchema/Request/myAction.json');
+        $validator->validate($request->getContent(), 'path/to/JsonSchema/Request/myAction.json');
         $errors = $validator->getErrors();
         if(!empty($errors)) {
             // do something with errors

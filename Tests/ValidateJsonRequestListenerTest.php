@@ -7,6 +7,9 @@ use Commander\JsonValidationBundle\EventListener\ValidateJsonRequestListener;
 use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
 use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Psr\Log\Test\TestLogger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -16,99 +19,147 @@ class ValidateJsonRequestListenerTest extends TestCase
 {
     public function testMissingAttribute(): void
     {
-        $request  = new Request();
-        $event    = $this->getControllerEvent($request);
-        $listener = $this->getValidateJsonListener();
+        $request = new Request();
 
-        $listener->onKernelController($event);
+        $event = $this->createControllerEvent($request);
+
+        $listener = $this->createValidateJsonListener($event);
 
         $this->assertFalse($request->attributes->has('validJson'));
     }
 
     public function testInvalidMethod(): void
     {
-        $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json', 'methods' => ['POST']]);
+        $annotation = new ValidateJsonRequest(['path' => 'Tests/schema-simple.json', 'methods' => [Request::METHOD_POST]]);
 
         $request = Request::create('/');
-        // in the real system this is handled by SensioFrameworkExtraBundle
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
-        $event    = $this->getControllerEvent($request);
-        $listener = $this->getValidateJsonListener();
+        $event = $this->createControllerEvent($request);
 
-        $listener->onKernelController($event);
+        $listener = $this->createValidateJsonListener($event);
+
+        $this->assertFalse($request->attributes->has('validJson'));
+    }
+
+    public function testInvalidSchema(): void
+    {
+        $annotation = new ValidateJsonRequest(['path' => 'Tests/schema-invalid.json']);
+
+        $request = Request::create('/', Request::METHOD_POST, [], [], [], [], '{"test": "hello"}');
+        $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
+
+        $event = $this->createControllerEvent($request);
+
+        $this->expectException(JsonValidationRequestException::class);
+
+        $listener = $this->createValidateJsonListener($event);
 
         $this->assertFalse($request->attributes->has('validJson'));
     }
 
     public function testInvalidJson(): void
     {
-        $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json']);
+        $annotation = new ValidateJsonRequest(['path' => 'Tests/schema-simple.json']);
 
         $request = Request::create('/', Request::METHOD_POST, [], [], [], [], '{invalid');
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
-        $event    = $this->getControllerEvent($request);
-        $listener = $this->getValidateJsonListener();
+        $event = $this->createControllerEvent($request);
 
         $this->expectException(JsonValidationRequestException::class);
-        $listener->onKernelController($event);
+
+        $listener = $this->createValidateJsonListener($event);
+
+        $this->assertFalse($request->attributes->has('validJson'));
     }
 
     public function testValidJson(): void
     {
-        $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json']);
+        $annotation = new ValidateJsonRequest(['path' => 'Tests/schema-simple.json']);
 
         $request = Request::create('/', Request::METHOD_POST, [], [], [], [], '{"test": "hello"}');
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
-        $event    = $this->getControllerEvent($request);
-        $listener = $this->getValidateJsonListener();
+        $event = $this->createControllerEvent($request, function ($validJson): void {
+        });
 
-        $listener->onKernelController($event);
+        $listener = $this->createValidateJsonListener($event);
 
         $this->assertTrue($request->attributes->has('validJson'));
-        $this->assertEquals($request->attributes->get('validJson')->test, 'hello');
+
+        $actualValidJson = $request->attributes->get('validJson');
+        $this->assertIsNotArray($actualValidJson);
+        $this->assertEquals('hello', $actualValidJson->test);
     }
 
     public function testValidJsonArray(): void
     {
-        $annotation = new ValidateJsonRequest(['path' => 'schema-simple.json']);
-        $request    = Request::create('/', Request::METHOD_POST, [], [], [], [], '{"test": "hello"}');
+        $annotation = new ValidateJsonRequest(['path' => 'Tests/schema-simple.json']);
+
+        $request = Request::create('/', Request::METHOD_POST, [], [], [], [], '{"test": "hello"}');
         $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
 
-        $kernel     = $this->getMockBuilder(HttpKernelInterface::class)
-                           ->getMock();
-        $controller = function (array $validJson): void {
-        };
-        $type       = HttpKernelInterface::MAIN_REQUEST;
-        $event      = new ControllerEvent($kernel, $controller, $request, $type);
+        $event = $this->createControllerEvent($request, function (array $validJson): void {
+        });
 
-        $listener = $this->getValidateJsonListener();
-
-        $listener->onKernelController($event);
+        $listener = $this->createValidateJsonListener($event);
 
         $this->assertTrue($request->attributes->has('validJson'));
-        $this->assertTrue(is_array($request->attributes->get('validJson')));
-        $this->assertEquals($request->attributes->get('validJson')['test'], 'hello');
+
+        $actualValidJson = $request->attributes->get('validJson');
+        $this->assertIsArray($actualValidJson);
+        $this->assertEquals('hello', $actualValidJson['test']);
     }
 
-    protected function getValidateJsonListener(): ValidateJsonRequestListener
+    public function testValidVendorJson(): void
     {
-        $locator   = new FileLocator([__DIR__]);
-        $validator = new JsonValidator($locator, __DIR__);
+        $annotation = new ValidateJsonRequest(['path' => 'vendor/json-schema-org/json-schema-test-suite/test-schema.json']);
 
-        return new ValidateJsonRequestListener($validator);
+        $request = Request::create('/', 'POST', [], [], [], [], <<<'JSON'
+            [{
+                "description": "The test case description",
+                "schema": { "type": "string" },
+                "tests": [
+                    {
+                        "description": "a test with a valid instance",
+                        "data": "a string",
+                        "valid": true
+                    }
+                ]
+            }]
+        JSON);
+        $request->attributes->set(sprintf('_%s', ValidateJsonRequest::ALIAS), $annotation);
+
+        $event = $this->createControllerEvent($request);
+
+        $listener = $this->createValidateJsonListener($event);
+
+        $this->assertTrue($request->attributes->has('validJson'));
+
+        $actualValidJson = $request->attributes->get('validJson');
+        $this->assertIsArray($actualValidJson);
+        $this->assertIsObject($actualValidJson[0]);
+        $this->assertEquals('The test case description', $actualValidJson[0]->description);
     }
 
-    protected function getControllerEvent(Request $request): ControllerEvent
+    protected function createValidateJsonListener(ControllerEvent $event): ValidateJsonRequestListener
     {
-        $kernel     = $this->getMockBuilder(HttpKernelInterface::class)
-                           ->getMock();
-        $controller = function ($validJson): void {
+        $locator = new FileLocator([__DIR__]);
+        $validator = new JsonValidator($locator, dirname(__DIR__));
+
+        $listener = new ValidateJsonRequestListener($validator);
+        $listener->onKernelController($event);
+
+        return $listener;
+    }
+
+    protected function createControllerEvent(Request $request, ?callable $controller = null): ControllerEvent
+    {
+        $kernel = $this->getMockBuilder(HttpKernelInterface::class)->getMock();
+        $controller ??= function ($validJson): void {
         };
-        $type       = HttpKernelInterface::MAIN_REQUEST;
 
-        return new ControllerEvent($kernel, $controller, $request, $type);
+        return new ControllerEvent($kernel, $controller, $request, HttpKernelInterface::MAIN_REQUEST);
     }
 }
