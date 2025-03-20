@@ -1,21 +1,8 @@
 {
     "name": "commander/json-validation-bundle",
     "description": "This bundle provides a way to validate JSON in request/response against a schema",
-    "type": "symfony-bundle",
-    "require": {
-        "php": "^7.4",
-        "ext-json": "*",
-        "symfony/config": "^5.4",
-        "symfony/http-foundation": "^5.4",
-        "justinrainbow/json-schema": ">=5.2",
-        "sensio/framework-extra-bundle": "^6.0",
-        "psr/log": "^1.1"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.1",
-        "rector/rector": "^2.0"
-    },
     "license": "MIT",
+    "type": "symfony-bundle",
     "authors": [
         {
             "name": "Anton Sukhachev",
@@ -28,7 +15,22 @@
             "role": "Author of joipolloi/json-validation-bundle"
         }
     ],
+    "require": {
+        "php": "^7.4",
+        "ext-json": "*",
+        "justinrainbow/json-schema": ">=5.2",
+        "psr/log": "^1.1",
+        "sensio/framework-extra-bundle": "^6.0",
+        "symfony/config": "^5.4",
+        "symfony/http-foundation": "^5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.1",
+        "rector/rector": "^2.0"
+    },
     "autoload": {
-        "psr-4": { "Commander\\JsonValidationBundle\\": "" }
+        "psr-4": {
+            "Commander\\JsonValidationBundle\\": ""
+        }
     }
 }
