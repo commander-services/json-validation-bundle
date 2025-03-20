@@ -8,7 +8,7 @@
         <service id="commander_json_validation.validator"
                  class="Commander\JsonValidationBundle\JsonValidator\JsonValidator">
             <argument type="service" id="file_locator"/>
-            <argument>%kernel.project_dir%/src</argument>
+            <argument>%kernel.project_dir%</argument>
         </service>
         <service id="commander_json_validation.request_listener"
                  class="Commander\JsonValidationBundle\EventListener\ValidateJsonRequestListener">

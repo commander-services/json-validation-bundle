@@ -2,8 +2,7 @@
 
 namespace Commander\JsonValidationBundle\JsonValidator;
 
-use JsonSchema\Exception\JsonDecodingException;
-use JsonSchema\Validator;
+use Opis\JsonSchema\Validator;
 use Symfony\Component\Config\FileLocatorInterface;
 
 class JsonValidator
@@ -14,60 +13,46 @@ class JsonValidator
 
     protected array $errors = [];
 
+    private Validator $validator;
+
     public function __construct(FileLocatorInterface $locator, string $schemaDir)
     {
         $this->locator   = $locator;
-        $this->schemaDir = $schemaDir;
+        $this->schemaDir = rtrim($schemaDir, DIRECTORY_SEPARATOR);
+        $this->validator = new Validator();
     }
 
     public function validate(string $json, string $schemaPath)
     {
         $this->errors = [];
-        $schema       = null;
 
         try {
-            $schema = $this->locator->locate(rtrim($this->schemaDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $schemaPath);
+            $schemaFilePath = $this->locator->locate($schemaPath, $this->schemaDir);
+            $schema = file_get_contents($schemaFilePath);
         } catch (\InvalidArgumentException $e) {
-            $this->errors[] = [
-                'property'   => null,
-                'pointer'    => null,
-                'message'    => 'Unable to locate schema ' . $schemaPath,
-                'constraint' => null,
-            ];
+            $this->errors[] = sprintf('Unable to locate schema %s', $schemaPath);
 
-            return null;
+            throw $e;
         }
-
-        $data = json_decode($json);
-
-        if ($data === null) {
-            $this->errors[] = [
-                'property'   => null,
-                'pointer'    => null,
-                'message'    => '[' . json_last_error() . '] ' . json_last_error_msg(),
-                'constraint' => null,
-            ];
-
-            return null;
-        }
-
-        $validator = new Validator();
 
         try {
-            $validator->check($data, (object)['$ref' => 'file://' . $schema]);
-        } catch (JsonDecodingException $e) {
-            $this->errors[] = [
-                'property'   => null,
-                'pointer'    => null,
-                'message'    => $e->getMessage(),
-                'constraint' => null,
-            ];
+            $data = json_decode($json, false, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $this->errors[] = sprintf('[%s] %s', $e->getCode(), $e->getMessage());
 
             return null;
         }
 
-        if (!$validator->isValid()) {
-            $this->errors = $validator->getErrors();
+        try {
+            $result = $this->validator->validate($data, $schema);
+
+            if ($result->hasError()) {
+                $this->errors[] = $result->error();
+
+            return null;
+        }
+        } catch (\Throwable $e) {
+            $this->errors[] = sprintf('[%s] %s', get_class($e), $e->getMessage());
 
             return null;
         }

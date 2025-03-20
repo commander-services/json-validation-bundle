@@ -6,6 +6,7 @@ use Commander\JsonValidationBundle\EventListener\ValidateJsonExceptionListener;
 use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Psr\Log\Test\TestLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -125,7 +126,7 @@ class ValidateJsonExceptionListenerTest extends TestCase
 
     protected function createValidateJsonExceptionListener(ExceptionEvent $event, ?LoggerInterface $logger = null): ValidateJsonExceptionListener
     {
-        $logger ??= new TestLogger();
+        $logger ??= new NullLogger();
         $listener = new ValidateJsonExceptionListener($logger);
         $listener->onKernelException($event);
 

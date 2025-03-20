@@ -1,6 +1,6 @@
 {
     "id": "id",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-06/schema#",
     "description": "Simple JSON schema test",
     "type": "object",
     "properties": {

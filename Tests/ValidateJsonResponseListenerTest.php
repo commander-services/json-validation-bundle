@@ -7,6 +7,7 @@ use Commander\JsonValidationBundle\EventListener\ValidateJsonResponseListener;
 use Commander\JsonValidationBundle\JsonValidator\JsonValidator;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Psr\Log\Test\TestLogger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,12 +19,12 @@ class ValidateJsonResponseListenerTest extends TestCase
 {
     public function testInvalidStatus(): void
     {
-        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
+        $annotation = new ValidateJsonResponse(['path' => 'Tests/schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
 
-        $request  = Request::create('/');
-        $response = new Response('', Response::HTTP_CREATED);
-
+        $request = Request::create('/');
         $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
+
+        $response = new Response('', Response::HTTP_CREATED);
 
         $event = $this->getResponseEvent($request, $response);
 
@@ -33,14 +34,47 @@ class ValidateJsonResponseListenerTest extends TestCase
         $this->assertFalse($logger->hasWarning('Json response validation'));
     }
 
-    public function testInvalidJson(): void
+    public function testInvalidSchemaPath(): void
     {
-        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
+        $annotation = new ValidateJsonResponse(['path' => 'file/not/exists.json']);
 
-        $request  = Request::create('/');
+        $request = Request::create('/');
+        $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
+
         $response = new Response('{invalid', Response::HTTP_OK);
 
+        $event = $this->getResponseEvent($request, $response);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $listener = $this->createValidateJsonResponseListener($event);
+    }
+
+    public function testInvalidSchema(): void
+    {
+        $annotation = new ValidateJsonResponse(['path' => 'Tests/schema-invalid.json']);
+
+        $request = Request::create('/');
         $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
+
+        $response = new Response('{invalid', Response::HTTP_OK);
+
+        $event = $this->getResponseEvent($request, $response);
+
+        $logger = new TestLogger();
+        $listener = $this->createValidateJsonResponseListener($event, $logger);
+
+        $this->assertTrue($logger->hasWarning('Json response validation'));
+    }
+
+    public function testInvalidJson(): void
+    {
+        $annotation = new ValidateJsonResponse(['path' => 'Tests/schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
+
+        $request = Request::create('/');
+        $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
+
+        $response = new Response('{invalid', Response::HTTP_OK);
 
         $event = $this->getResponseEvent($request, $response);
 
@@ -52,12 +86,12 @@ class ValidateJsonResponseListenerTest extends TestCase
 
     public function testValidJson(): void
     {
-        $annotation = new ValidateJsonResponse(['path' => 'schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
+        $annotation = new ValidateJsonResponse(['path' => 'Tests/schema-simple.json', 'statuses' => [Response::HTTP_OK]]);
 
-        $request  = Request::create('/');
-        $response = new Response('{"test": "hello"}', Response::HTTP_OK);
-
+        $request = Request::create('/');
         $request->attributes->set(sprintf('_%s', ValidateJsonResponse::ALIAS), $annotation);
+
+        $response = new Response('{"test": "hello"}', Response::HTTP_OK);
 
         $event = $this->getResponseEvent($request, $response);
 
@@ -69,9 +103,10 @@ class ValidateJsonResponseListenerTest extends TestCase
 
     protected function createValidateJsonResponseListener(ResponseEvent $event, ?LoggerInterface $logger = null): ValidateJsonResponseListener
     {
-        $locator = new FileLocator([__DIR__]);
-        $validator = new JsonValidator($locator, __DIR__);
-        $logger ??= new TestLogger();
+        $projectDir = dirname(__DIR__);
+        $locator = new FileLocator([$projectDir]);
+        $validator = new JsonValidator($locator, $projectDir);
+        $logger ??= new NullLogger();
 
         $listener = new ValidateJsonResponseListener($validator, $logger);
         $listener->onKernelResponse($event);
@@ -82,7 +117,7 @@ class ValidateJsonResponseListenerTest extends TestCase
     protected function getResponseEvent(Request $request, Response $response): ResponseEvent
     {
         $kernel = $this->getMockBuilder(HttpKernelInterface::class)->getMock();
-        $type   = HttpKernelInterface::MAIN_REQUEST;
+        $type = HttpKernelInterface::MAIN_REQUEST;
 
         return new ResponseEvent($kernel, $request, $type, $response);
     }
