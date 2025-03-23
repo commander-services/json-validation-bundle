@@ -16,10 +16,7 @@ class ValidateJsonRequestListener
         $this->jsonValidator = $jsonValidator;
     }
 
-    /**
-     * @param ControllerEvent|FilterControllerEvent $event
-     */
-    public function onKernelController($event): void
+    public function onKernelController(ControllerEvent $event): void
     {
         $request = $event->getRequest();
 
@@ -49,8 +46,8 @@ class ValidateJsonRequestListener
             $annotation->getPath()
         );
 
-        if (!empty($this->jsonValidator->getErrors())) {
-            throw new JsonValidationRequestException( $request, $annotation->getPath(), $this->jsonValidator->getErrors());
+        if ($this->jsonValidator->hasError()) {
+            throw new JsonValidationRequestException($request, $annotation->getPath(), $this->jsonValidator->getError());
         }
 
         if ($this->getAsArray($event->getController())) {

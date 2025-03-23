@@ -2,29 +2,44 @@
 
 namespace Commander\JsonValidationBundle\Exception;
 
+use Opis\JsonSchema\Errors\ValidationError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class JsonValidationRequestException extends BadRequestHttpException
 {
-    protected array $errors;
+    /**
+     * @var null|string|ValidationError
+     */
+    protected $error;
 
     protected Request $request;
 
     protected string $schemaPath;
 
-    public function __construct(Request $request, string $schemaPath, array $errors = [])
+    /**
+     * @param null|string|ValidationError $error
+     */
+    public function __construct(Request $request, string $schemaPath, $error = null)
     {
-        $this->request    = $request;
+        $this->request = $request;
         $this->schemaPath = $schemaPath;
-        $this->errors     = $errors;
+        $this->error = $error;
 
         parent::__construct('Json request validation error');
     }
 
+    /**
+     * @deprecated
+     */
     public function getErrors(): array
     {
-        return $this->errors;
+        return [$this->error];
+    }
+
+    public function getError()
+    {
+        return $this->error;
     }
 
     public function getRequest(): Request
