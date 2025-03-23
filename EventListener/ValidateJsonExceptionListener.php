@@ -3,6 +3,8 @@
 namespace Commander\JsonValidationBundle\EventListener;
 
 use Commander\JsonValidationBundle\Exception\JsonValidationRequestException;
+use Opis\JsonSchema\Errors\ErrorFormatter;
+use Opis\JsonSchema\Errors\ValidationError;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,47 +19,49 @@ class ValidateJsonExceptionListener
         $this->logger = $logger;
     }
 
-    /**
-     * @param ExceptionEvent|GetResponseForExceptionEvent $event
-     */
-    public function onKernelException($event): void
+    public function onKernelException(ExceptionEvent $event): void
     {
-        if (method_exists($event, 'getThrowable')) {
-            $exception = $event->getThrowable();
-        } else {
-            $exception = $event->getException();
-        }
+        $exception = $event->getThrowable();
 
         if (!$exception instanceof JsonValidationRequestException) {
             return;
         }
 
         $data = [
-            'status' => Response::HTTP_BAD_REQUEST,
-            'title'  => 'Unable to parse/validate JSON',
+            'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
+            'title' => 'Unable to parse/validate JSON',
             'detail' => 'There was a problem with the JSON that was sent with the request',
-            'errors' => $this->formatErrors($exception->getErrors()),
+            'errors' => $this->formatErrors($exception->getError()),
         ];
 
         $event->setResponse(
             new JsonResponse(
                 $data,
-                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
                 ['Content-Type' => 'application/problem+json']
             )
         );
 
-        $this->logger->error('Json request validation',
+        $this->logger->error(
+            'Json request validation',
             [
-                'uri'        => $exception->getRequest()->getUri(),
+                'uri' => $exception->getRequest()->getUri(),
                 'schemaPath' => $exception->getSchemaPath(),
-                'errors'     => $exception->getErrors()
+                'errors' => $exception->getError(),
             ]
         );
     }
 
-    protected function formatErrors(array $errors): array
+    protected function formatErrors($error): array
     {
-        return array_map('array_filter', $errors);
+        if ($error instanceof ValidationError) {
+            return (new ErrorFormatter())->format($error, true);
+        }
+
+        if (empty($error)) {
+            return [];
+        }
+        
+        return [(string) $error];
     }
 }

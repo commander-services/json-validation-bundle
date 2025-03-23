@@ -19,10 +19,7 @@ class ValidateJsonResponseListener
         $this->logger        = $logger;
     }
 
-    /**
-     * @param ResponseEvent|FilterResponseEvent $event
-     */
-    public function onKernelResponse($event): void
+    public function onKernelResponse(ResponseEvent $event): void
     {
         $request  = $event->getRequest();
         $response = $event->getResponse();
@@ -51,12 +48,12 @@ class ValidateJsonResponseListener
             $annotation->getPath()
         );
 
-        if (!empty($this->jsonValidator->getErrors())) {
+        if ($this->jsonValidator->hasError()) {
             $this->logger->warning('Json response validation',
                 [
                     'uri'        => $request->getUri(),
                     'schemaPath' => $annotation->getPath(),
-                    'errors'     => $this->jsonValidator->getErrors()
+                    'errors'     => $this->jsonValidator->getError()
                 ]
             );
         }
