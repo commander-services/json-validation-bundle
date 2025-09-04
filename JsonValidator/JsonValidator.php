@@ -19,11 +19,16 @@ class JsonValidator
 
     private Validator $validator;
 
-    public function __construct(FileLocatorInterface $locator, string $schemaDir)
-    {
+    public function __construct(
+        FileLocatorInterface $locator,
+        string $schemaDir,
+        array $resolverRegisterFiles = [],
+        array $resolverRegisterPrefixes = []
+    ) {
         $this->locator   = $locator;
         $this->schemaDir = rtrim($schemaDir, DIRECTORY_SEPARATOR);
-        $this->validator = new Validator();
+        //TODO this is ugly, refactor to factory
+        $this->validator = $this->createValidator($resolverRegisterFiles, $resolverRegisterPrefixes);
     }
 
     public function validate(string $json, string $schemaPath)
@@ -83,5 +88,26 @@ class JsonValidator
     public function getErrors(): array
     {
         return [$this->error];
+    }
+
+    /**
+     * @param array<string,string> $resolverRegisterFiles
+     * @param array<string,string> $resolverRegisterPrefixes
+     */
+    private function createValidator(array $resolverRegisterFiles, array $resolverRegisterPrefixes): Validator
+    {
+        $validator = new Validator();
+
+        if (($resolver = $validator->loader()->resolver()) !== null) {
+            foreach ($resolverRegisterFiles as $id => $file) {
+                $resolver->registerFile($id, $file);
+            }
+
+            foreach ($resolverRegisterPrefixes as $prefix => $dir) {
+                $resolver->registerPrefix($prefix, $dir);
+            }
+        }
+
+        return $validator;
     }
 }
