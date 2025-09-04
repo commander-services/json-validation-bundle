@@ -9,6 +9,8 @@
                  class="Commander\JsonValidationBundle\JsonValidator\JsonValidator">
             <argument type="service" id="file_locator"/>
             <argument>%kernel.project_dir%</argument>
+            <argument>%commander_json_validation.validator.resolver_register_files%</argument>
+            <argument>%commander_json_validation.validator.resolver_register_prefixes%</argument>
         </service>
         <service id="commander_json_validation.request_listener"
                  class="Commander\JsonValidationBundle\EventListener\ValidateJsonRequestListener">

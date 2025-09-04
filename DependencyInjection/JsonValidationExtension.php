@@ -32,6 +32,9 @@ class JsonValidationExtension extends ConfigurableExtension
             $container->getDefinition('commander_json_validation.exception_listener')
                       ->addTag('kernel.event_listener', ['event' => 'kernel.exception']);
         }
+
+        $container->setParameter('commander_json_validation.validator.resolver_register_files', $config['resolver']['register_file'] ?? []);
+        $container->setParameter('commander_json_validation.validator.resolver_register_prefixes', $config['resolver']['register_prefix'] ?? []);
     }
 
     /**
